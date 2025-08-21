@@ -5,6 +5,7 @@ import Header from '@/app/ui/header'
 import Footer from '@/app/ui/footer'
 import { cookies } from 'next/headers'
 
+export const runtime = 'edge'; //部署到Cloudflare Pages时，需要指定运行时环境
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
