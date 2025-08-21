@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 关于我和Cue Card
 
-## Getting Started
+时间：2025.8.21
 
-First, run the development server:
+在考研的复习中，我有了关于Cue Card的一些想法，因此我想实现它，不管结果怎么样，我希望是有帮助的。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 👋 自我介绍
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2025年九月份后就是大四学生了，喜欢独立站设计与开发，但能力有限。 软件工程专业，某双非院校在读，目前正在复习考研。
+兴趣是成长中最好的老师，不会就查，借助AI。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🧰 技能栈
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+前端：React / Next.js / Tailwind CSS
+后端：Node.js / Supabase
+数据库：PostgreSQL
+工具：Git/Supabse Auth/Resend Email
 
-## Learn More
+## 🤔 想法和实现
 
-To learn more about Next.js, take a look at the following resources:
+建立网站大致框架，包括用户登录注册以及个人信息修改。
+添加设置，内置字体，用户可以更改网站字体样式。
+添加Cue Card.只有登录用户可以添加卡片，而且添加分类时，基于自己之前添加的分类以供选择 ，还可以自定义分类。
+主页面可以显示用户添加的卡片，~~可以按照分类进行筛选。~~
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🎨 卡片设计
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+翻转卡片，正面显示Question, 背面显示Answer。
+卡片显示标签、是否公开、发布者以及反转提示。
+~~点击标签查看改标签下的卡片。~~
+~~卡片可以编辑、删除。~~
+~~卡片可以导出~~。
 
-## Deploy on Vercel
+## 📬 联系方式
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+如果你想联系我，可以通过以下方式：
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📧 Email: chenmoliang2022@outlook.com
+
+💻 GitHub: github.com/Nathan0228
+
+📝 Blog: 我的博客Waterman
+
+## 🥤 ![Buy Me A Coffee](/buy-me-a-coffee.jpg)
