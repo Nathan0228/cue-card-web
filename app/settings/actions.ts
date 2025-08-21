@@ -14,8 +14,9 @@ export async function saveFontPreference(formData: FormData) {
 		data: { preferred_font: value },
 	})
 
-	// 同步写入 Cookie，便于布局立即应用
-	cookies().set('preferred_font', value, { path: '/', maxAge: 60 * 60 * 24 })
+	// 同步写入 Cookie，便于布局立即应用,cookie只读
+	const cookieStore = cookies()
+	//cookies().set('preferred_font', value, { path: '/', maxAge: 60 * 60 * 24 })
 
 	revalidatePath('/')
 } 

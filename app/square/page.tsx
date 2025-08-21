@@ -61,6 +61,13 @@ export default async function SquarePage() {
                 {publicCards.map((card) => {
                     // 判断是不是当前用户的卡片
                     const isOwnCard = currentUser ? card.user_id === currentUser.id : false
+                    const category =
+                        Array.isArray(card.category)
+                        ?card.category.length > 0
+                        ?card.category[0]
+                             : null
+                            :card.category || null
+
 
                     return (
                         <CueCard
@@ -68,7 +75,7 @@ export default async function SquarePage() {
                             id={card.id}
                             question={card.question}
                             answer={card.answer}
-                            category={card.category}
+                            category={category}
                             private={card.private}
                             user={{
                                 id: card.user_id,

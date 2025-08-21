@@ -48,13 +48,21 @@ export default async function CueCardList() {
 		
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {cueCards.map((card) => {
+                //console.log("card.category: ", card.category)
+                const category =
+                Array.isArray(card.category)
+                ?card.category.length > 0
+                ?card.category[0]
+                 :null
+                 :card.category || null
+
                 return (
                     <CueCard
                         key={card.id}
                         id={card.id}
                         question={card.question}
                         answer={card.answer}
-                        category={card.category}
+                        category={category}
                         private={card.private}
                         // 3. 将从 session 中获取的用户信息传递给每个卡片
                         // 因为这整个列表都是当前用户的，所以用户信息是相同的
@@ -63,6 +71,7 @@ export default async function CueCardList() {
                     />
                 )
             })}
+
         </div>
     )
 }

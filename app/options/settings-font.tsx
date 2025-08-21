@@ -22,6 +22,7 @@ export default function SettingsFont({ current }: SettingsFontProps) {
 	const previewClass = useMemo(() => value, [value])
 
 	return (
+		
 		<div className="space-y-3">
 			<form
 				action={(formData) => start(() => saveFontPreference(formData))}

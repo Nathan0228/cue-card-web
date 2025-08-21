@@ -3,6 +3,7 @@ import SettingsNav from '@/app/settings/nav'
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {
 	return (
+		
 		<div className="mx-auto w-full max-w-6xl px-4 py-6 md:py-8">
 			{/* 移动端：导航在上方 */}
 			<div className="block md:hidden mb-6">

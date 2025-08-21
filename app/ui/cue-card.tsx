@@ -19,7 +19,7 @@ interface CueCardProps {
     id: string
     question: string
     answer: string
-    category?: Category
+    category?: Category | null
     private: boolean
     user: User
     isOwnCard: boolean
@@ -66,12 +66,17 @@ export default function CueCard({
                                 )}
                                 <span>{isPrivate ? '私密' : '公开'}</span>
                             </div>
-                            {category && (
+                            {category ? (
                                 <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
                                     <Tag className="h-3 w-3" />
                                     
                                     {category.name}
                                 </div>
+                            ):(
+                                <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                                    <Tag className="h-3 w-3" />
+                                    未分类
+                                </div>    
                             )}
                         </div>
                         <div className="flex-1 flex items-center justify-center text-center">
@@ -114,11 +119,17 @@ export default function CueCard({
                                 )}
                                 <span>{isPrivate ? '私密' : '公开'}</span>
                             </div>
-                            {category && (
+                            {category ? (
                                 <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
                                     <Tag className="h-3 w-3" />
                                     {category.name}
                                 </div>
+                            ):(
+                                
+                                <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                                    <Tag className="h-3 w-3" />
+                                    未分类
+                                </div>    
                             )}
                         </div>
 
