@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
-import { Eye, EyeOff, Tag, User } from 'lucide-react'
+import { Eye, EyeOff, User, Maximize2, Minimize2, ChevronLeft, ChevronRight } from 'lucide-react'
+import CustomTag from './custom-tag'
 
 interface Category {
     id: string
@@ -26,6 +28,8 @@ interface CueCardProps {
 
     onDelete?: (id: string) => void
     onEdit?: (id: string) => void
+    onPrev?: () => void
+    onNext?: () => void
 }
 
 export default function CueCard({
@@ -36,17 +40,227 @@ export default function CueCard({
     private: isPrivate,
     user,
     isOwnCard,
-    onDelete,
-    onEdit,
+    onPrev,
+    onNext,
 }: CueCardProps) {
     const [isFlipped, setIsFlipped] = useState(false)
+    const [isEnlarged, setIsEnlarged] = useState(false)
+    const [isMounted, setIsMounted] = useState(false)
+    const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+    const lastDeltaRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
+    const isSwipeRef = useRef(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
+    useEffect(() => {
+        if (!isEnlarged) return
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsEnlarged(false)
+        }
+        document.addEventListener('keydown', onKey)
+        return () => document.removeEventListener('keydown', onKey)
+    }, [isEnlarged])
+
+    // 跨卡片打开/切换：监听全局事件
+    useEffect(() => {
+        function onOpen(e: Event) {
+            const detail = (e as CustomEvent).detail as { id?: string } | undefined
+            const targetId = detail?.id
+            setIsFlipped(false)
+            setIsEnlarged(targetId === id)
+        }
+        window.addEventListener('cuecard-open', onOpen as EventListener)
+        return () => window.removeEventListener('cuecard-open', onOpen as EventListener)
+    }, [id])
 
     const handleFlip = () => {
+        if (isSwipeRef.current) return
         setIsFlipped(!isFlipped)
     }
 
     return (
         <div className="group perspective-1000">
+            {/* 放大视图遮罩 */}
+            {isMounted && isEnlarged && createPortal(
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/30 backdrop-blur-md"
+                    onClick={() => setIsEnlarged(false)}
+                >
+                    <div
+                        className="relative w-[70vw] h-[70vh] max-w-[70vw] max-h-[70vh]"
+                        onClick={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => {
+                            const t = e.touches[0]
+                            touchStartRef.current = { x: t.clientX, y: t.clientY }
+                            lastDeltaRef.current = { x: 0, y: 0 }
+                            isSwipeRef.current = false
+                        }}
+                        onTouchMove={(e) => {
+                            if (!touchStartRef.current) return
+                            const t = e.touches[0]
+                            const dx = t.clientX - touchStartRef.current.x
+                            const dy = t.clientY - touchStartRef.current.y
+                            lastDeltaRef.current = { x: dx, y: dy }
+                            if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+                                isSwipeRef.current = true
+                                // 防止页面在移动端滚动
+                                e.preventDefault()
+                            }
+                        }}
+                        onTouchEnd={() => {
+                            const start = touchStartRef.current
+                            if (!start) return
+                            const { x: dx, y: dy } = lastDeltaRef.current
+                            const SWIPE_THRESHOLD = 40
+                            const isVertical = Math.abs(dy) > Math.abs(dx)
+                            if (isVertical && Math.abs(dy) > SWIPE_THRESHOLD) {
+                                if (dy > 0) {
+                                    // 向下滑：下一张
+                                    onNext?.()
+                                } else {
+                                    // 向上滑：上一张
+                                    onPrev?.()
+                                }
+                            }
+                            touchStartRef.current = null
+                            lastDeltaRef.current = { x: 0, y: 0 }
+                            // 轻微延迟，避免触发点击翻转
+                            setTimeout(() => { isSwipeRef.current = false }, 100)
+                        }}
+                    >
+                        {/* 左右切换按钮 */}
+                        <button
+                            type="button"
+                            aria-label="上一张"
+                            onClick={(e) => { e.stopPropagation(); onPrev?.() }}
+                            disabled={!onPrev}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/80 hover:bg-white shadow disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            <ChevronLeft className="h-5 w-5 text-gray-700" />
+                        </button>
+                        <button
+                            type="button"
+                            aria-label="下一张"
+                            onClick={(e) => { e.stopPropagation(); onNext?.() }}
+                            disabled={!onNext}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/80 hover:bg-white shadow disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            <ChevronRight className="h-5 w-5 text-gray-700" />
+                        </button>
+                        {/* 放大容器内重用卡片内容 */}
+                        <div
+                            className={`relative h-full w-full cursor-pointer transition-all duration-500 transform-style-preserve-3d ${
+                                isFlipped ? 'rotate-y-180' : ''
+                            }`}
+                            onClick={() => setIsFlipped(!isFlipped)}
+                        >
+                            {/* 正面 */}
+                            <div className="absolute inset-0 backface-hidden">
+                                <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-lg">
+                                    <div className="flex items-start justify-between mb-6">
+                                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                                            {isPrivate ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                            <span>{isPrivate ? '私密' : '公开'}</span>
+                                        </div>
+                                        {category ? (
+                                            <CustomTag>
+                                                {category.name}
+                                            </CustomTag>
+                                        ) : (
+                                            <CustomTag className="bg-gray-100 text-gray-600">
+                                                未分类
+                                            </CustomTag>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 flex items-center justify-center text-center">
+                                        <h3 className="text-2xl font-semibold text-gray-900 whitespace-pre-wrap">
+                                            {question}
+                                        </h3>
+                                    </div>
+                                    <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
+                                        {isOwnCard ? (
+                                            <span className="flex items-center gap-1">
+                                                <User className="h-4 w-4" />
+                                                我
+                                            </span>
+                                        ) : (
+                                            <Link
+                                                href={`/user/${user.id}`}
+                                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <User className="h-4 w-4" />
+                                                {user.full_name || user.email}
+                                            </Link>
+                                        )}
+                                        <span>点击查看答案</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* 背面 */}
+                            <div className="absolute inset-0 backface-hidden rotate-y-180">
+                                <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-gray-50 p-8 shadow-lg">
+                                    <div className="flex items-start justify-between mb-6">
+                                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                                            {isPrivate ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                            <span>{isPrivate ? '私密' : '公开'}</span>
+                                        </div>
+                                        {category ? (
+                                            <CustomTag>
+                                                {category.name}
+                                            </CustomTag>
+                                        ) : (
+                                            <CustomTag className="bg-gray-100 text-gray-600">
+                                                未分类
+                                            </CustomTag>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 flex items-center justify-center text-center">
+                                        <p className="text-lg text-gray-700 whitespace-pre-wrap">{answer}</p>
+                                    </div>
+                                    <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
+                                        {isOwnCard ? (
+                                            <span className="flex items-center gap-1">
+                                                <User className="h-4 w-4" />
+                                                我
+                                            </span>
+                                        ) : (
+                                            <Link
+                                                href={`/user/${user.id}`}
+                                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <User className="h-4 w-4" />
+                                                {user.full_name || user.email}
+                                            </Link>
+                                        )}
+                                        <span>点击返回问题</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/* 关闭/缩小按钮 */}
+                        <button
+                            type="button"
+                            onClick={() => setIsEnlarged(false)}
+                            className="absolute top-3 right-3 z-20 inline-flex items-center justify-center h-8 w-8 rounded-full bg-white/90 text-gray-700 shadow hover:bg-white"
+                            aria-label="缩小"
+                        >
+                            <Minimize2 className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>, document.body)
+            }
             <div
                 className={`relative h-72 w-full cursor-pointer transition-all duration-500 transform-style-preserve-3d ${
                     isFlipped ? 'rotate-y-180' : ''
@@ -67,16 +281,13 @@ export default function CueCard({
                                 <span>{isPrivate ? '私密' : '公开'}</span>
                             </div>
                             {category ? (
-                                <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                                    <Tag className="h-3 w-3" />
-                                    
+                                <CustomTag>
                                     {category.name}
-                                </div>
+                                </CustomTag>
                             ):(
-                                <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                                    <Tag className="h-3 w-3" />
+                                <CustomTag className="bg-gray-100 text-gray-600">
                                     未分类
-                                </div>    
+                                </CustomTag>    
                             )}
                         </div>
                         <div className="flex-1 flex items-center justify-center text-center">
@@ -102,7 +313,24 @@ export default function CueCard({
                                     {user.full_name || user.email}
                                 </Link>
                             )}
-                            <span>点击查看答案</span>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    type="button"
+                                    className="inline-flex items-center gap-1 text-black-600 hover:text-black-700"
+                                    onClick={(e) => { e.stopPropagation(); setIsEnlarged((v) => !v) }}
+                                >
+                                    {isEnlarged ? (
+                                        <>
+                                            <Minimize2 className="h-4 w-4" /> 
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Maximize2 className="h-4 w-4" /> 
+                                        </>
+                                    )}
+                                </button>
+                                <span>点击查看答案</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -120,16 +348,13 @@ export default function CueCard({
                                 <span>{isPrivate ? '私密' : '公开'}</span>
                             </div>
                             {category ? (
-                                <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                                    <Tag className="h-3 w-3" />
+                                <CustomTag>
                                     {category.name}
-                                </div>
+                                </CustomTag>
                             ):(
-                                
-                                <div className="flex items-center gap-1 text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                                    <Tag className="h-3 w-3" />
+                                <CustomTag className="bg-gray-100 text-gray-600">
                                     未分类
-                                </div>    
+                                </CustomTag>    
                             )}
                         </div>
 
@@ -154,7 +379,24 @@ export default function CueCard({
                                     {user.full_name || user.email}
                                 </Link>
                             )}
-                            <span>点击返回问题</span>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    type="button"
+                                    className="inline-flex items-center gap-1 text-black-600 hover:text-black-700"
+                                    onClick={(e) => { e.stopPropagation(); setIsEnlarged((v) => !v) }}
+                                >
+                                    {isEnlarged ? (
+                                        <>
+                                            <Minimize2 className="h-4 w-4" />
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Maximize2 className="h-4 w-4" />
+                                        </>
+                                    )}
+                                </button>
+                                <span>点击返回问题</span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -45,9 +45,36 @@ export default function UserMenu({ avatarUrl, email, fullName }: UserMenuProps) 
 	// 处理退出登录
 	const handleSignOut = async () => {
 		setIsSigningOut(true)
+		
 		closeMenu()
 		
 		try {
+			// 清理浏览器侧的登录信息与缓存
+			if (typeof window !== 'undefined') {
+				try {
+					const keysToRemove: string[] = []
+					for (let i = 0; i < localStorage.length; i++) {
+						const key = localStorage.key(i)
+						if (!key) continue
+						// Supabase 本地存储键通常以 sb- 开头，或包含 supabase
+						// 也顺带清理应用可能写入的偏好键
+						if (
+							key.startsWith('sb-') ||
+							key.toLowerCase().includes('supabase') ||
+							key === 'preferred_font' ||
+							key.startsWith('cuecard:')
+						) {
+							keysToRemove.push(key)
+						}
+					}
+					keysToRemove.forEach((k) => localStorage.removeItem(k))
+					// 会话级缓存一并清理
+					sessionStorage.clear()
+				} catch (e) {
+					console.warn('清理本地存储时出错:', e)
+				}
+			}
+			
 			await signOut()
 			// 退出成功后跳转到登录页
 			router.push('/login')

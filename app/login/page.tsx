@@ -22,6 +22,7 @@ export default function LoginPage() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (session) {
         router.push('/');
+        //return NextResponse.redirect('/',request.url)
       }
     });
 
@@ -29,7 +30,6 @@ export default function LoginPage() {
   }, [supabase, router]);
   
   return (
-    
     <div style={{ width: '100%', maxWidth: '420px', margin: 'auto', paddingTop: '100px' }}>
       <Auth
         supabaseClient={supabase}

@@ -1,9 +1,19 @@
 import { createClient } from '@/app/lib/supabase/server'
-import CueCard from '@/app/ui/cue-card'
+import SquareWrapper from './square-wrapper'
 
 export default async function SquarePage() {
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
+
+    // 获取所有分类
+    const { data: categories, error: categoriesError } = await supabase
+        .from('categories')
+        .select('id, name')
+        .order('name')
+
+    if (categoriesError) {
+        console.error('获取分类失败:', categoriesError)
+    }
 
     // 获取所有公开的卡片，连同分类信息
     const { data: publicCards, error } = await supabase
@@ -50,47 +60,32 @@ export default async function SquarePage() {
         }
         : null
 
+    const cards = publicCards?.map((card) => ({
+        id: card.id,
+        question: card.question,
+        answer: card.answer,
+        private: card.private,
+        category: Array.isArray(card.category)
+            ? card.category.length > 0
+                ? card.category[0]
+                : null
+            : card.category || null,
+        user_id: card.user_id,
+    })) || []
+
     return (
         <div className="mx-auto w-full max-w-6xl px-4 py-6 md:py-8">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold tracking-tight">广场</h1>
-                <p className="text-sm text-gray-500"><span className="font-bold text-red-600">待实现</span>发现其他用户分享的精彩卡片</p>
+                <p className="text-sm text-gray-500">
+                    <span className='text-green-500 text-sm'>开发中···</span>发现其他用户分享的精彩卡片</p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {publicCards.map((card) => {
-                    // 判断是不是当前用户的卡片
-                    const isOwnCard = currentUser ? card.user_id === currentUser.id : false
-                    const category =
-                        Array.isArray(card.category)
-                        ?card.category.length > 0
-                        ?card.category[0]
-                             : null
-                            :card.category || null
-
-
-                    return (
-                        <CueCard
-                            key={card.id}
-                            id={card.id}
-                            question={card.question}
-                            answer={card.answer}
-                            category={category}
-                            private={card.private}
-                            user={{
-                                id: card.user_id,
-                                // 没有 join users 表，所以这里只能展示 ID
-                                // 如果以后要显示用户昵称，可以再查 auth.users 或自己建一张 profiles 表
-                                email: '',
-                                full_name: isOwnCard
-                                    ? currentUser?.full_name || '我'
-                                    : '其他用户',
-                            }}
-                            isOwnCard={isOwnCard}
-                        />
-                    )
-                })}
-            </div>
+            <SquareWrapper 
+                categories={categories || []} 
+                cards={cards} 
+                currentUser={currentUser} 
+            />
         </div>
     )
 }

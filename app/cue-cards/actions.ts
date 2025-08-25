@@ -13,6 +13,7 @@ export async function createCard(formData: FormData) {
   // 2. 获取表单字段
   const question = String(formData.get('question') ?? '')
   const answer = String(formData.get('answer') ?? '')
+  const visibility = String(formData.get('visibility') ?? 'private')
 
   const categoryId = formData.get('categoryId') as string | null
   const newCategoryName = String(formData.get('newCategoryName') ?? '').trim()
@@ -48,6 +49,7 @@ export async function createCard(formData: FormData) {
     answer,
     user_id: user.id,
     category_id: finalCategoryId, // 如果没有分类，可以是 null
+    private: visibility !== 'public',
   })
 
   if (error) {

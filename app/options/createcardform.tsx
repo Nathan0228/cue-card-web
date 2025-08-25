@@ -46,6 +46,8 @@ export function CreateCardForm({ createAction, categories }: CreateCardFormProps
         </div>
       </div>
 
+  
+
       {/* 2. 答案文本域 */}
       <div>
         <label htmlFor="answer" className="block text-sm font-medium leading-6 text-gray-900">
@@ -84,6 +86,8 @@ export function CreateCardForm({ createAction, categories }: CreateCardFormProps
         </div>
       </div>
 
+       
+
       {/* 4. 新建分类 */}
       <div>
         <label htmlFor="newCategoryName" className="block text-sm font-medium leading-6 text-gray-900">
@@ -97,6 +101,33 @@ export function CreateCardForm({ createAction, categories }: CreateCardFormProps
             placeholder="输入新分类名称"
             className="block w-full rounded-md border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
+        </div>
+      </div>
+      
+
+         {/* 3.5 可见性选择（公开 / 私密） */}
+       <div>
+        <span className="block text-sm font-medium leading-6 text-gray-900">可见性 🔒</span>
+        <div className="mt-2 flex items-center gap-6">
+          <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="radio"
+              name="visibility"
+              value="public"
+              className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-600"
+            />
+            公开
+          </label>
+          <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="radio"
+              name="visibility"
+              value="private"
+              defaultChecked
+              className="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-600"
+            />
+            私密
+          </label>
         </div>
       </div>
 

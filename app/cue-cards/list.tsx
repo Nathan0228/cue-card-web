@@ -1,5 +1,5 @@
 import { createClient } from '@/app/lib/supabase/server'
-import CueCard from '@/app/ui/cue-card'
+import CueCardGridClient from '@/app/cue-cards/grid-client'
 
 export default async function CueCardList() {
     const supabase = createClient()
@@ -44,34 +44,20 @@ export default async function CueCardList() {
         full_name: session.user.user_metadata?.full_name || '匿名用户' // 使用可选链和默认值
     };
 
-    return (
-		
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {cueCards.map((card) => {
-                //console.log("card.category: ", card.category)
-                const category =
-                Array.isArray(card.category)
-                ?card.category.length > 0
-                ?card.category[0]
-                 :null
-                 :card.category || null
+    const cards = cueCards.map((card) => {
+        const category = Array.isArray(card.category)
+            ? card.category.length > 0
+                ? card.category[0]
+                : null
+            : card.category || null
+        return {
+            id: card.id,
+            question: card.question,
+            answer: card.answer,
+            private: card.private,
+            category,
+        }
+    })
 
-                return (
-                    <CueCard
-                        key={card.id}
-                        id={card.id}
-                        question={card.question}
-                        answer={card.answer}
-                        category={category}
-                        private={card.private}
-                        // 3. 将从 session 中获取的用户信息传递给每个卡片
-                        // 因为这整个列表都是当前用户的，所以用户信息是相同的
-                        user={currentUser}
-                        isOwnCard={true}
-                    />
-                )
-            })}
-
-        </div>
-    )
+    return <CueCardGridClient cards={cards} currentUser={currentUser} />
 }

@@ -1,6 +1,7 @@
 'use client'
 import React from "react";
 import { useState } from "react";
+import Image from 'next/image'
 
 export default function AboutPage() {
     const [showModal, setShowModal] = useState(false);
@@ -87,11 +88,11 @@ export default function AboutPage() {
             <p>
               💻 GitHub:{" "}
               <a
-                href="https://github.com/Nathan0228"
+                href="https://github.com/Nathan0228/cue-card-web"
                 target="_blank"
                 className="text-blue-600 hover:underline"
               >
-                github.com/Nathan0228
+                github.com/Nathan0228/cue-card-web
               </a>
             </p>
             <p>
@@ -113,14 +114,37 @@ export default function AboutPage() {
             className="text-2xl font-semibold text-gray-800 mb-3">🥤 Buy Me A Coffee</h2>
             
             {showModal && (
-                <img
+                <Image
                 src='/buy-me-a-coffee.jpg'
+                width={500}
+                height={500}
                 alt = 'Buy Me A Coffee'
                 className="mx-auto mt-4 max-w-sm rounded-xl shadow-lg" 
                 />
                 )}
+        </section>
+
+{/* 2025.8.25更新 */}
+        <section>
+            <h2
+            onClick={() => setShowModal(!showModal)}
+            className="text-lg font-bold text-green-800 mb-3">  2025.8.25更新
+            </h2>
+            {showModal && (
+              <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                <li>添加卡片时可以选择私有或公开。</li>
+                <li>卡片可以放大查看，电脑端按Esc可以关闭，移动端向下滑切换下一个。</li>
+                <li>主页显示我的卡片，且可以进行卡片切换。</li>
+                <li>头部固定，更加符合现代化设计。</li>
+                <li>个性化标签设计，可以自定义标签。</li>
+                <li>广场展示自己的公开卡片，可按标签进行查看。</li>
+                
+                 </ul>
+               
+                )}
             
         </section>
+
       </main>
     </div>
   );

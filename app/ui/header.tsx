@@ -19,8 +19,7 @@ export default async function Header() {
 	}
 
 	return (
-		
-		<header className="border-b border-gray-200 bg-white">
+		<header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
 			<div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
 				<Link href="/" className="text-3xl font-bold text-gray-900">
 					Cue Card
@@ -29,10 +28,10 @@ export default async function Header() {
 				{user && (
 					<div className="flex items-center gap-12 ">
 						<Button asChild variant="outline" size="sm">
-							<Link className='block px-4 py-2 text-md text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150' href="/cue-cards/create">创建卡片</Link>
+							<Link className='block px-4 py-2 text-md text-gray-700  hover:font-bold text-black-900 transition-colors duration-150' href="/cue-cards/create">创建卡片</Link>
 						</Button>
 						<Button asChild variant="outline" size="sm">
-							<Link className='block px-4 py-2 text-md text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors duration-150' href="/square">广场</Link>
+							<Link className='block px-4 py-2 text-md text-gray-700  hover:font-bold text-black-900 transition-colors duration-150' href="/square">广场</Link>
 						</Button>
 					</div>
 				)}
