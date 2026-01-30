@@ -1,5 +1,6 @@
 import { createClient } from '@/app/lib/supabase/server'
 import UserMenu from '@/app/ui/user-menu'
+import { HeaderSearch } from '@/app/ui/header-search'
 import Link from 'next/link'
 import { Button } from '@/app/ui/button'
 
@@ -17,26 +18,31 @@ export default async function Header() {
 		fullName = typeof meta.full_name === 'string' ? meta.full_name : null
 		avatarUrl = typeof meta.avatar_url === 'string' ? meta.avatar_url : null
 	}
-
 	return (
 		<header className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-			<div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-				<Link href="/" className="text-3xl font-bold text-gray-900">
+			<div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+				<Link href="/" className="shrink-0 text-3xl font-bold text-gray-900">
 					Cue Card
 				</Link>
+
+				
 				
 				{user && (
-					<div className="flex items-center gap-12 ">
+					<div className="flex shrink-0 items-center gap-4">
 						<Button asChild variant="outline" size="sm">
-							<Link className='block px-4 py-2 text-md text-gray-700  hover:font-bold text-black-900 transition-colors duration-150' href="/cue-cards/create">创建卡片</Link>
+							<Link className="block px-4 py-2 text-md text-gray-700 hover:font-bold text-black-900 transition-colors duration-150" href="/cue-cards/create">创建卡片</Link>
 						</Button>
 						<Button asChild variant="outline" size="sm">
-							<Link className='block px-4 py-2 text-md text-gray-700  hover:font-bold text-black-900 transition-colors duration-150' href="/square">广场</Link>
+							<Link className="block px-4 py-2 text-md text-gray-700 hover:font-bold text-black-900 transition-colors duration-150" href="/square">广场</Link>
 						</Button>
 					</div>
 				)}
+
+<div className="min-w-0 flex-1 flex justify-center">
+					<HeaderSearch />
+				</div>
 				
-				<div>
+				<div className="shrink-0">
 					{user ? (
 						<UserMenu avatarUrl={avatarUrl ?? null} email={email ?? null} fullName={fullName ?? null} />
 					) : (

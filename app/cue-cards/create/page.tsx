@@ -24,7 +24,6 @@ export default async function CreateCardPage() {
   }
 
   return (
-	
     <div className="mx-auto w-full max-w-4xl px-4 py-6 md:py-8">
       <h1 className="mb-4 text-2xl font-bold tracking-tight">Create a new Cue Card</h1>
       <CreateCardForm createAction={createCard} categories={categories ?? []} />

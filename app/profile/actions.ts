@@ -20,6 +20,17 @@ export async function updateProfile(formData: FormData) {
 		},
 	})
 
+	// 同步到 profiles 表，供广场/用户页显示作者名
+	await supabase.from('profiles').upsert(
+		{
+			id: user.id,
+			full_name: fullName || null,
+			avatar_url: avatarUrl || null,
+			updated_at: new Date().toISOString(),
+		},
+		{ onConflict: 'id' }
+	)
+
 	// 尝试更新手机号（若项目启用手机登录，可能需要验证）
 	if (phone && phone !== user.phone) {
 		try {

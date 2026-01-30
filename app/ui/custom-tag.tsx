@@ -40,24 +40,15 @@ export default function CustomTag({ children, className = '', showIcon = true }:
     // Function to update tag style
     const updateTagStyle = () => {
       const styleCookie = getCookieValue('preferred_tag_style')
-      console.log('CustomTag: Found cookie:', styleCookie) // Debug log
-      
+
       if (styleCookie && styleCookie !== 'default') {
         try {
-          // Decode URL-encoded cookie value first
           const decodedCookie = decodeURIComponent(styleCookie)
-          console.log('CustomTag: Decoded cookie:', decodedCookie) // Debug log
-          
           const parsed = JSON.parse(decodedCookie)
-          console.log('CustomTag: Parsed style:', parsed) // Debug log
           setTagStyle(parsed)
-        } catch (error) {
-          console.error('CustomTag: Failed to parse style:', error) // Debug log
-          console.log('CustomTag: Raw cookie value was:', styleCookie) // Debug log
+        } catch {
           // Keep default if parsing fails
         }
-      } else {
-        console.log('CustomTag: Using default style') // Debug log
       }
     }
 
@@ -71,15 +62,12 @@ export default function CustomTag({ children, className = '', showIcon = true }:
 
     // Listen for custom event when tag style is saved
     const handleTagStyleChange = (e: CustomEvent) => {
-      console.log('CustomTag: Received style change event:', e.detail)
       if (e.detail && e.detail.tagStyle) {
         try {
-          // Event data should already be decoded, but let's be safe
           const parsed = JSON.parse(e.detail.tagStyle)
-          console.log('CustomTag: Event style applied:', parsed)
           setTagStyle(parsed)
-        } catch (error) {
-          console.error('CustomTag: Failed to parse event style:', error)
+        } catch {
+          // Keep current style if parsing fails
         }
       }
     }

@@ -145,6 +145,23 @@ export default function AboutPage() {
             
         </section>
 
+  {/* 2026.1.30更新 */}
+  <section>
+            <h2
+            onClick={() => setShowModal(!showModal)}
+            className="text-lg font-bold text-green-800 mb-3">  2026.1.30更新
+            </h2>
+            {showModal && (
+              <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                <li>恢复网站功能，可使用邮箱和Github登录。</li>
+                <li>添加搜索功能，可以搜索卡片。</li>
+                <li>增加卡片的修改和删除功能。</li>
+                <li>增加点击用户查看用户公开卡片功能。</li>
+                
+                 </ul>
+                )}
+        </section>
+
       </main>
     </div>
   );

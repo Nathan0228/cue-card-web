@@ -1,4 +1,5 @@
 import { createClient } from '@/app/lib/supabase/server'
+import { deleteCard } from '@/app/cue-cards/actions'
 import CueCardGridClient from '@/app/cue-cards/grid-client'
 
 export default async function CueCardList() {
@@ -41,7 +42,7 @@ export default async function CueCardList() {
     const currentUser = {
         id: session.user.id,
         email: session.user.email || '',
-        full_name: session.user.user_metadata?.full_name || '匿名用户' // 使用可选链和默认值
+        full_name: '我' // 当前登录用户名字显示“我”
     };
 
     const cards = cueCards.map((card) => {
@@ -59,5 +60,5 @@ export default async function CueCardList() {
         }
     })
 
-    return <CueCardGridClient cards={cards} currentUser={currentUser} />
+    return <CueCardGridClient cards={cards} currentUser={currentUser} deleteAction={deleteCard} />
 }

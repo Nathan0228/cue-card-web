@@ -19,11 +19,15 @@ type CurrentUser = { id: string; email: string; full_name?: string } | null
 export default function SquareWrapper({ 
   categories, 
   cards, 
-  currentUser 
+  currentUser,
+  authorNames = {},
+  deleteAction,
 }: { 
   categories: Category[]
   cards: Card[]
-  currentUser: CurrentUser 
+  currentUser: CurrentUser
+  authorNames?: Record<string, string>
+  deleteAction?: (cardId: string) => Promise<void>
 }) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
@@ -39,7 +43,12 @@ export default function SquareWrapper({
         onCategorySelect={setSelectedCategory} 
       />
 
-      <SquareGridClient cards={filteredCards} currentUser={currentUser} />
+      <SquareGridClient 
+        cards={filteredCards} 
+        currentUser={currentUser} 
+        authorNames={authorNames} 
+        deleteAction={deleteAction}
+      />
     </>
   )
 }

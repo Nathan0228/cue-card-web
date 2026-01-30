@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import CueCard from '@/app/ui/cue-card'
 
 type Category = { id: string; name: string }
@@ -13,7 +14,14 @@ type Card = {
 
 type CurrentUser = { id: string; email: string; full_name?: string }
 
-export default function CueCardGridClient({ cards, currentUser }: { cards: Card[]; currentUser: CurrentUser }) {
+type Props = {
+  cards: Card[]
+  currentUser: CurrentUser
+  deleteAction?: (cardId: string) => Promise<void>
+}
+
+export default function CueCardGridClient({ cards, currentUser, deleteAction }: Props) {
+  const router = useRouter()
   const ids = cards.map((c) => c.id)
 
   function openCardByIndex(index: number) {
@@ -22,6 +30,12 @@ export default function CueCardGridClient({ cards, currentUser }: { cards: Card[
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('cuecard-open', { detail: { id } }))
     }
+  }
+
+  async function handleDelete(id: string) {
+    if (!deleteAction) return
+    await deleteAction(id)
+    router.refresh()
   }
 
   return (
@@ -36,6 +50,7 @@ export default function CueCardGridClient({ cards, currentUser }: { cards: Card[
           private={card.private}
           user={currentUser}
           isOwnCard={true}
+          onDelete={deleteAction ? handleDelete : undefined}
           onPrev={() => openCardByIndex(idx - 1)}
           onNext={() => openCardByIndex(idx + 1)}
         />

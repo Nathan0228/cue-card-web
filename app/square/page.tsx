@@ -1,4 +1,5 @@
 import { createClient } from '@/app/lib/supabase/server'
+import { deleteCard } from '@/app/cue-cards/actions'
 import SquareWrapper from './square-wrapper'
 
 export default async function SquarePage() {
@@ -29,7 +30,6 @@ export default async function SquarePage() {
         `)
         .eq('private', false)
         .order('created_at', { ascending: false })
-
     if (error) {
         return (
             <div className="mx-auto w-full max-w-6xl px-4 py-6 md:py-8">
@@ -73,6 +73,24 @@ export default async function SquarePage() {
         user_id: card.user_id,
     })) || []
 
+    // 获取所有卡片作者的用户名（profiles 表；若表不存在则全部显示为匿名用户）
+    const authorIds = [...new Set((publicCards ?? []).map((c) => c.user_id))]
+    const authorNames: Record<string, string> = {}
+    try {
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', authorIds)
+        for (const p of profiles ?? []) {
+            authorNames[p.id] = p.full_name?.trim() || '匿名用户'
+        }
+    } catch {
+        // profiles 表可能尚未创建
+    }
+    for (const id of authorIds) {
+        if (!(id in authorNames)) authorNames[id] = '匿名用户'
+    }
+
     return (
         <div className="mx-auto w-full max-w-6xl px-4 py-6 md:py-8">
             <div className="mb-6">
@@ -84,7 +102,9 @@ export default async function SquarePage() {
             <SquareWrapper 
                 categories={categories || []} 
                 cards={cards} 
-                currentUser={currentUser} 
+                currentUser={currentUser}
+                authorNames={authorNames}
+                deleteAction={deleteCard}
             />
         </div>
     )

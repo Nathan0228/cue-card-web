@@ -3,8 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Link from 'next/link'
-import { Eye, EyeOff, User, Maximize2, Minimize2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Eye, EyeOff, User, Maximize2, Minimize2, ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import CustomTag from './custom-tag'
+import { ConfirmDialog } from './confirm-dialog'
 
 interface Category {
     id: string
@@ -40,12 +41,28 @@ export default function CueCard({
     private: isPrivate,
     user,
     isOwnCard,
+    onDelete,
     onPrev,
     onNext,
 }: CueCardProps) {
     const [isFlipped, setIsFlipped] = useState(false)
     const [isEnlarged, setIsEnlarged] = useState(false)
     const [isMounted, setIsMounted] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+
+    const openDeleteConfirm = (cardId: string) => {
+        setPendingDeleteId(cardId)
+        setShowDeleteConfirm(true)
+    }
+    const closeDeleteConfirm = () => {
+        setShowDeleteConfirm(false)
+        setPendingDeleteId(null)
+    }
+    const handleConfirmDelete = () => {
+        if (pendingDeleteId) onDelete?.(pendingDeleteId)
+        closeDeleteConfirm()
+    }
     const touchStartRef = useRef<{ x: number; y: number } | null>(null)
     const lastDeltaRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
     const isSwipeRef = useRef(false)
@@ -185,10 +202,14 @@ export default function CueCard({
                                     </div>
                                     <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
                                         {isOwnCard ? (
-                                            <span className="flex items-center gap-1">
+                                            <Link
+                                                href={`/user/${user.id}`}
+                                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
                                                 <User className="h-4 w-4" />
-                                                我
-                                            </span>
+                                                {user.full_name || '我'}
+                                            </Link>
                                         ) : (
                                             <Link
                                                 href={`/user/${user.id}`}
@@ -199,7 +220,27 @@ export default function CueCard({
                                                 {user.full_name || user.email}
                                             </Link>
                                         )}
-                                        <span>点击查看答案</span>
+                                        <div className="flex items-center gap-3">
+                                            {isOwnCard && (
+                                                <>
+                                                    <Link
+                                                        href={`/cue-cards/edit/${id}`}
+                                                        className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <Pencil className="h-4 w-4" /> 编辑
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        className="inline-flex items-center gap-1 text-red-600 hover:text-red-700"
+                                                        onClick={(e) => { e.stopPropagation(); openDeleteConfirm(id) }}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" /> 删除
+                                                    </button>
+                                                </>
+                                            )}
+                                            <span>点击查看答案</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -230,10 +271,14 @@ export default function CueCard({
                                     </div>
                                     <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
                                         {isOwnCard ? (
-                                            <span className="flex items-center gap-1">
+                                            <Link
+                                                href={`/user/${user.id}`}
+                                                className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
                                                 <User className="h-4 w-4" />
-                                                我
-                                            </span>
+                                                {user.full_name || '我'}
+                                            </Link>
                                         ) : (
                                             <Link
                                                 href={`/user/${user.id}`}
@@ -244,7 +289,27 @@ export default function CueCard({
                                                 {user.full_name || user.email}
                                             </Link>
                                         )}
-                                        <span>点击返回问题</span>
+                                        <div className="flex items-center gap-3">
+                                            {isOwnCard && (
+                                                <>
+                                                    <Link
+                                                        href={`/cue-cards/edit/${id}`}
+                                                        className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <Pencil className="h-4 w-4" /> 编辑
+                                                    </Link>
+                                                    <button
+                                                        type="button"
+                                                        className="inline-flex items-center gap-1 text-red-600 hover:text-red-700"
+                                                        onClick={(e) => { e.stopPropagation(); openDeleteConfirm(id) }}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" /> 删除
+                                                    </button>
+                                                </>
+                                            )}
+                                            <span>点击返回问题</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -296,13 +361,17 @@ export default function CueCard({
                             </h3>
                         </div>
 
-                        {/* 用户信息 */}
+                        {/* 用户信息与操作 */}
                         <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
                             {isOwnCard ? (
-                                <span className="flex items-center gap-1">
+                                <Link
+                                    href={`/user/${user.id}`}
+                                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
                                     <User className="h-3 w-3" />
-                                    我
-                                </span>
+                                    {user.full_name || '我'}
+                                </Link>
                             ) : (
                                 <Link
                                     href={`/user/${user.id}`}
@@ -314,19 +383,37 @@ export default function CueCard({
                                 </Link>
                             )}
                             <div className="flex items-center gap-3">
+                                {isOwnCard && (
+                                    <>
+                                        <Link
+                                            href={`/cue-cards/edit/${id}`}
+                                            className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700"
+                                            onClick={(e) => e.stopPropagation()}
+                                            title="编辑"
+                                        >
+                                            <Pencil className="h-3.5 w-3.5" />
+                                            编辑
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center gap-1 text-red-600 hover:text-red-700"
+                                            onClick={(e) => { e.stopPropagation(); openDeleteConfirm(id) }}
+                                            title="删除"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                            删除
+                                        </button>
+                                    </>
+                                )}
                                 <button
                                     type="button"
                                     className="inline-flex items-center gap-1 text-black-600 hover:text-black-700"
                                     onClick={(e) => { e.stopPropagation(); setIsEnlarged((v) => !v) }}
                                 >
                                     {isEnlarged ? (
-                                        <>
-                                            <Minimize2 className="h-4 w-4" /> 
-                                        </>
+                                        <Minimize2 className="h-4 w-4" />
                                     ) : (
-                                        <>
-                                            <Maximize2 className="h-4 w-4" /> 
-                                        </>
+                                        <Maximize2 className="h-4 w-4" />
                                     )}
                                 </button>
                                 <span>点击查看答案</span>
@@ -362,13 +449,17 @@ export default function CueCard({
                             <p className="text-base  text-gray-700 line-clamp-6">{answer}</p>
                         </div>
 
-                        {/* 用户信息 */}
+                        {/* 用户信息与操作 */}
                         <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
                             {isOwnCard ? (
-                                <span className="flex items-center gap-1">
+                                <Link
+                                    href={`/user/${user.id}`}
+                                    className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
                                     <User className="h-3 w-3" />
-                                    我
-                                </span>
+                                    {user.full_name || '我'}
+                                </Link>
                             ) : (
                                 <Link
                                     href={`/user/${user.id}`}
@@ -380,20 +471,34 @@ export default function CueCard({
                                 </Link>
                             )}
                             <div className="flex items-center gap-3">
+                                {isOwnCard && (
+                                    <>
+                                        <Link
+                                            href={`/cue-cards/edit/${id}`}
+                                            className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-700"
+                                            onClick={(e) => e.stopPropagation()}
+                                            title="编辑"
+                                        >
+                                            <Pencil className="h-3.5 w-3.5" />
+                                            编辑
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            className="inline-flex items-center gap-1 text-red-600 hover:text-red-700"
+                                            onClick={(e) => { e.stopPropagation(); openDeleteConfirm(id) }}
+                                            title="删除"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                            删除
+                                        </button>
+                                    </>
+                                )}
                                 <button
                                     type="button"
                                     className="inline-flex items-center gap-1 text-black-600 hover:text-black-700"
                                     onClick={(e) => { e.stopPropagation(); setIsEnlarged((v) => !v) }}
                                 >
-                                    {isEnlarged ? (
-                                        <>
-                                            <Minimize2 className="h-4 w-4" />
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Maximize2 className="h-4 w-4" />
-                                        </>
-                                    )}
+                                    {isEnlarged ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                                 </button>
                                 <span>点击返回问题</span>
                             </div>
@@ -401,6 +506,17 @@ export default function CueCard({
                     </div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={showDeleteConfirm}
+                title="删除卡片"
+                message="确定要删除这张卡片吗？删除后无法恢复。"
+                confirmLabel="删除"
+                cancelLabel="取消"
+                variant="destructive"
+                onConfirm={handleConfirmDelete}
+                onCancel={closeDeleteConfirm}
+            />
         </div>
     )
 }

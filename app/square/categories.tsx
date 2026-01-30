@@ -15,7 +15,6 @@ interface CategoriesProps {
 
 export default function Categories({ categories, selectedCategory, onCategorySelect }: CategoriesProps) {
   return (
-    
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <CustomTag showIcon={false} className="text-gray-500">
